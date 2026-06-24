@@ -251,7 +251,7 @@ button {
 .menu-button {
   display: none;
   border: none;
-  background: rgba(0, 0, 0, .04);
+  background: rgba(6, 0, 0, 0.04);
   border-radius: 12px;
   width: 40px;
   height: 40px;
@@ -261,7 +261,7 @@ button {
   display: block;
   width: 17px;
   height: 2px;
-  background: #edeef0ab;
+  background: #1851c3ab;
   margin: 4px auto;
   border-radius: 2px;
 }
