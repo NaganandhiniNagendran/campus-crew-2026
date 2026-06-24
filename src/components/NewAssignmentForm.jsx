@@ -11,24 +11,29 @@ const initialForm = {
 function NewAssignmentForm({ onCreate }) {
   const [form, setForm] = useState(initialForm)
   const [error, setError] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
 
   function updateField(field, value) {
-    setForm({ field: value })
+    setForm(prev => ({ ...prev, [field]: value }))
   }
 
   function handleSubmit(event) {
     event.preventDefault()
-    if (!form.title && !form.course && !form.dueDate) {
+    if (!form.title || !form.course || !form.dueDate) {
       setError('Please fill every required field.')
+      setSuccessMessage('')
       return
     }
     onCreate(form)
-    setError('Assignment created successfully')
+    setForm(initialForm)
+    setError('')
+    setSuccessMessage('Assignment created successfully')
   }
 
   return (
     <form className="assignment-form" onSubmit={handleSubmit}>
-      {error && <p className="form-message">{error}</p>}
+      {error && <p className="form-message error">{error}</p>}
+      {successMessage && <p className="form-message success">{successMessage}</p>}
       <label>
         Title
         <input value={form.title} onChange={(event) => updateField('title', event.target.value)} placeholder="Sprint retrospective" />

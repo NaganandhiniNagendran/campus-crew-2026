@@ -9,20 +9,25 @@ function AnnouncementPanel({ announcements, expanded = false }) {
       <div className="panel-header">
         <div>
           <h2>Announcements</h2>
-          <p>Latest updates for project teams</p>
+          <p className="announcement-subtitle">Latest update for project team</p>
         </div>
         <Pin size={22} />
       </div>
 
+
       <div className="announcement-list">
-        {visibleAnnouncements.map((announcement) => (
+        {visibleAnnouncements.map((announcement, index) => (
           <article className="announcement-card" key={announcement.id}>
             <div>
               <h3>{announcement.title}</h3>
               <p>{announcement.body}</p>
               <small>{formatDate(announcement.date)}</small>
             </div>
-            {announcement.pinned && <span className="pin-badge">Pinned</span>}
+            {(announcement.pinned || index === 0) && (
+              <span className="pin-badge" aria-label="Pinned">
+                <Pin size={16} className="pin-icon" />
+              </span>
+            )}
           </article>
         ))}
       </div>

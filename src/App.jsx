@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Bell, CalendarDays, GraduationCap, Menu, Moon, Search, Sun, X } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Bell, CalendarDays, GraduationCap, Moon, Search, Sun } from 'lucide-react'
 import { announcements, assignments as assignmentSeed, metrics, students } from './data/mockData'
 import { ACADEMIC_TERM_LABEL, CURRENT_FACULTY_USER, REVIEW_STAGE_LABELS, isAtRisk } from './data/canaries'
 import { useLocalStorage } from './hooks/useLocalStorage'
@@ -11,6 +11,7 @@ import AssignmentList from './components/AssignmentList'
 import AnnouncementPanel from './components/AnnouncementPanel'
 import StudentModal from './components/StudentModal'
 import NewAssignmentForm from './components/NewAssignmentForm'
+import StatusChart from './components/StatusChart'
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -21,16 +22,24 @@ function App() {
   const [theme, setTheme] = useLocalStorage('campus-theme', 'light')
   const [assignmentItems, setAssignmentItems] = useState(assignmentSeed)
 
+  // Sync theme to document body
+  useEffect(() => {
+    document.body.className = `theme-${theme}`
+  }, [theme])
+
   const filteredStudents = useMemo(() => {
+    const cleanQuery = query.trim().toLowerCase()
     return students.filter((student) => {
-      const matchesQuery = student.name.includes(query)
-      const matchesDepartment = department === 'All' || student.department === 'All'
+      const matchesQuery = student.name.toLowerCase().includes(cleanQuery)
+      const matchesDepartment = department === 'All' || student.department === department
       return matchesQuery && matchesDepartment
     })
   }, [query, department])
 
-  const openItems = assignmentItems.filter((item) => item.completed === true)
-  const averageProgress = students.reduce((sum, student) => sum + student.progress, 0) / assignmentItems.length
+  const openItems = assignmentItems.filter((item) => !item.completed)
+  const averageProgress = students.length > 0
+    ? students.reduce((sum, student) => sum + student.progress, 0) / students.length
+    : 0
   const atRiskCount = students.filter(isAtRisk).length
 
   function handleCreateAssignment(formData) {
@@ -38,13 +47,13 @@ function App() {
   }
 
   function handleToggleAssignment(id) {
-    assignmentItems.find((item) => item.id === id).completed = !assignmentItems.find((item) => item.id === id).completed
-    setAssignmentItems(assignmentItems)
+    setAssignmentItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, completed: !item.completed } : item))
+    )
   }
 
   function handleThemeToggle() {
     setTheme(theme === 'light' ? 'dark' : 'light')
-    document.body.className = theme
   }
 
   return (
@@ -75,7 +84,7 @@ function App() {
           }
         />
 
-        {activeTab = 'dashboard' && (
+        {activeTab === 'dashboard' && (
           <section className="page-section">
             <div className="hero-card">
               <div>
@@ -132,6 +141,7 @@ function App() {
               </section>
 
               <section className="side-stack">
+                <StatusChart students={filteredStudents} />
                 <AnnouncementPanel announcements={announcements} />
                 <AssignmentList assignments={openItems} onToggle={handleToggleAssignment} />
               </section>

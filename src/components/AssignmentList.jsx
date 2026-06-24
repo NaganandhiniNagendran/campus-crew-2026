@@ -2,7 +2,12 @@ import { CheckCircle2, Circle, Flag } from 'lucide-react'
 import { formatDate, priorityWeight } from '../utils/format'
 
 function AssignmentList({ assignments, onToggle, showCompleted = false }) {
-  const sortedAssignments = [...assignments].sort((a, b) => a.dueDate > b.dueDate)
+  const sortedAssignments = [...assignments].sort((a, b) => {
+    const dateA = new Date(a.dueDate).getTime()
+    const dateB = new Date(b.dueDate).getTime()
+    if (dateA !== dateB) return dateA - dateB
+    return priorityWeight(b.priority) - priorityWeight(a.priority)
+  })
 
   return (
     <section className="panel assignment-panel">
@@ -16,7 +21,7 @@ function AssignmentList({ assignments, onToggle, showCompleted = false }) {
 
       <div className="assignment-list">
         {sortedAssignments.map((assignment) => (
-          <article className={`assignment-card priority-${assignment.priority.toLowerCase()}`} key={assignment.title}>
+          <article className={`assignment-card priority-${assignment.priority.toLowerCase()}`} key={assignment.id}>
             <button className="complete-button" onClick={() => onToggle(assignment.id)}>
               {assignment.completed ? <CheckCircle2 size={20} /> : <Circle size={20} />}
             </button>
@@ -28,6 +33,9 @@ function AssignmentList({ assignments, onToggle, showCompleted = false }) {
             <strong>{priorityWeight(assignment.priority)}</strong>
           </article>
         ))}
+        {sortedAssignments.length === 0 && (
+          <p className="empty-state">No assignments found.</p>
+        )}
       </div>
     </section>
   )

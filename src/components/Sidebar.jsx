@@ -27,7 +27,10 @@ function Sidebar({ isOpen, activeTab, onChangeTab, onClose }) {
             <button
               key={item.id}
               className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
-              onClick={() => onChangeTab('dashboard')}
+              onClick={() => {
+                onChangeTab(item.id)
+                onClose()
+              }}
             >
               <Icon size={18} />
               {item.label}
